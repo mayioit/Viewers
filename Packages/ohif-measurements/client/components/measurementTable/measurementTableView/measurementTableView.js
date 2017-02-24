@@ -1,11 +1,12 @@
 import { Template } from 'meteor/templating';
 import { Tracker } from 'meteor/tracker';
+import { ReactiveVar } from 'meteor/reactive-var';
 import { _ } from 'meteor/underscore';
 import { OHIF } from 'meteor/ohif:core';
 
 Template.measurementTableView.onCreated(() => {
     const instance = Template.instance();
-    const { measurementApi, timepointApi } = instance.data;
+    const { measurementApi, timepointApi } = OHIF.viewer;
 
     instance.data.measurementGroups = new ReactiveVar();
 
@@ -18,7 +19,7 @@ Template.measurementTableView.onCreated(() => {
 
 Template.measurementTableView.events({
     'click .js-pdf'(event, instance) {
-        const { measurementApi, timepointApi } = instance.data;
+        const { measurementApi, timepointApi } = OHIF.viewer;
         OHIF.measurements.exportPdf(measurementApi, timepointApi);
     }
 });
@@ -52,10 +53,8 @@ Template.measurementTableView.helpers({
     },
 
     newMeasurements(toolGroup) {
-        const instance = Template.instance();
-        const measurementApi = instance.data.measurementApi;
-        const timepointApi = instance.data.timepointApi;
-        const current = instance.data.timepointApi.current();
+        const { measurementApi, timepointApi } = OHIF.viewer;
+        const current = timepointApi.current();
         const baseline = timepointApi.baseline();
 
         if (!measurementApi || !timepointApi || !current || !baseline) return;

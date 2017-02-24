@@ -8,7 +8,7 @@ Template.measurementTableRow.onCreated(() => {
     instance.getWarningMessages = () => {
         const measurementTypeId = instance.data.rowItem.measurementTypeId;
         const measurementNumber = instance.data.rowItem.measurementNumber;
-        const groupedNonConformities = instance.data.conformanceCriteria.groupedNonConformities.get() || {};
+        const groupedNonConformities = OHIF.viewer.conformanceCriteria.groupedNonConformities.get() || {};
         const nonconformitiesByMeasurementTypeId = groupedNonConformities[measurementTypeId] || {};
         const nonconformitiesByMeasurementNumbers = nonconformitiesByMeasurementTypeId.measurementNumbers || {};
         const nonconformitiesByMeasurementNumber = nonconformitiesByMeasurementNumbers[measurementNumber] || {};
@@ -52,10 +52,8 @@ Template.measurementTableRow.events({
 
         // Show the measure flow for targets
         OHIF.measurements.toggleLabelButton({
-            instance,
             measurement: entry,
             element: document.body,
-            measurementApi: instance.data.measurementApi,
             position: {
                 x: event.clientX,
                 y: event.clientY
@@ -78,8 +76,7 @@ Template.measurementTableRow.events({
             const measurementTypeId = instance.data.rowItem.measurementTypeId;
             const measurement = instance.data.rowItem.entries[0];
             const measurementNumber = measurement.measurementNumber;
-            const measurementApi = instance.data.measurementApi;
-            const timepointApi = instance.data.timepointApi;
+            const { timepointApi, measurementApi } = OHIF.viewer;
 
             // Remove all the measurements with the given type and number
             measurementApi.deleteMeasurements(measurementTypeId, { measurementNumber });

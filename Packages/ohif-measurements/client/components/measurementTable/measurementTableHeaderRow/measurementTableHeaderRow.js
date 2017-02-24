@@ -9,7 +9,7 @@ Template.measurementTableHeaderRow.helpers({
     },
 
     maxNumMeasurements() {
-        const { conformanceCriteria } = Template.instance().data;
+        const conformanceCriteria = OHIF.viewer.conformanceCriteria;
         if (!conformanceCriteria) return;
 
         return conformanceCriteria.maxTargets.get();
@@ -18,7 +18,8 @@ Template.measurementTableHeaderRow.helpers({
     anyUnmarkedLesionsLeft() {
         // Skip New Lesions section
         const instance = Template.instance();
-        const { toolGroup, measurementRows, timepointApi, measurementApi } = instance.data;
+        const { toolGroup, measurementRows } = instance.data;
+        const { timepointApi, measurementApi } = OHIF.viewer;
         if (!measurementRows) {
             return;
         }

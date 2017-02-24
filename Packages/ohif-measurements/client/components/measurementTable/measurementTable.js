@@ -14,13 +14,14 @@ Template.measurementTable.onCreated(() => {
         // Get the current table layout
         const tableLayout = instance.data.measurementTableLayout.get();
 
+        const timepointApi = OHIF.viewer.timepointApi;
         let timepoints;
-        if (!instance.data.timepointApi) {
+        if (!timepointApi) {
             timepoints = [];
         } else if (tableLayout === 'key') {
-            timepoints = instance.data.timepointApi.key();
+            timepoints = timepointApi.key();
         } else {
-            timepoints = instance.data.timepointApi.currentAndPrior();
+            timepoints = timepointApi.currentAndPrior();
         }
 
         // Return key timepoints
@@ -51,7 +52,7 @@ Template.measurementTable.onRendered(() => {
 
 Template.measurementTable.helpers({
     hasWarnings() {
-        return Template.instance().data.conformanceCriteria.nonconformities.get();
+        return OHIF.viewer.conformanceCriteria.nonconformities.get();
     },
 
     buttonGroupData() {
@@ -71,7 +72,7 @@ Template.measurementTable.helpers({
 
 Template.measurementTable.events({
     'click .warning-status'(event, instance) {
-        const nonconformities = instance.data.conformanceCriteria.nonconformities.get();
+        const nonconformities = OHIF.viewer.conformanceCriteria.nonconformities.get();
         const messages = [];
         _.each(nonconformities, nonconformity => messages.push(nonconformity.message));
 

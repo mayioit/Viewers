@@ -1,8 +1,9 @@
+import { Template } from 'meteor/templating';
+import { OHIF } from 'meteor/ohif:core';
+
 Template.measurementTableTimepointHeader.helpers({
-    'timepointName': function() {
-        const timepoint = this;
-        const instance = Template.instance();
-        const timepointApi = instance.data.timepointApi;
+    timepointName(timepoint) {
+        const timepointApi = OHIF.viewer.timepointApi;
         return timepointApi.name(timepoint);
     }
 });

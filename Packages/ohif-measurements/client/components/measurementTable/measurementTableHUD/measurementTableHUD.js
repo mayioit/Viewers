@@ -1,9 +1,15 @@
+import { Template } from 'meteor/templating';
+import { Session } from 'meteor/session';
+import { ReactiveVar } from 'meteor/reactive-var';
+import { OHIF } from 'meteor/ohif:core';
+
 Template.measurementTableHUD.onCreated(() => {
     const instance = Template.instance();
+    const timepointApi = OHIF.viewer.timepointApi;
 
     instance.isRemoved = true;
-    if (instance.data.timepointApi) {
-        instance.data.timepoints = new ReactiveVar(instance.data.timepointApi.currentAndPrior());    
+    if (timepointApi) {
+        instance.data.timepoints = new ReactiveVar(timepointApi.currentAndPrior());
     }
 });
 
@@ -37,6 +43,7 @@ Template.measurementTableHUD.helpers({
 
         return instance.isRemoved !== true ? 'dialog-animated dialog-closed' : 'hidden';
     },
+
     toolbarButtons() {
         let buttonData = [];
 

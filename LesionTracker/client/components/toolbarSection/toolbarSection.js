@@ -50,7 +50,7 @@ Template.toolbarSection.helpers({
 
     toolbarButtons() {
         // Check if the measure tools shall be disabled
-        const isToolDisabled = false; //!Template.instance().data.timepointApi;
+        const isToolDisabled = false; //!OHIF.viewer.timepointApi;
 
         const targetSubTools = [];
 

@@ -7,7 +7,6 @@ Template.dialogNonTargetMeasurement.onCreated(() => {
     const instance = Template.instance();
 
     instance.measurementTypeId = 'nonTarget';
-    const timepointApi = instance.data.timepointApi;
 
     const config = OHIF.measurements.MeasurementApi.getConfiguration();
     instance.schema = new SimpleSchema({
@@ -17,7 +16,7 @@ Template.dialogNonTargetMeasurement.onCreated(() => {
 
     // Remove the measurement from the collection
     instance.removeMeasurement = () => {
-        const measurementApi = instance.viewerData.measurementApi;
+        const measurementApi = OHIF.viewer.measurementApi;
         measurementApi.deleteMeasurements('nonTargets', {
             toolItemId: instance.data.measurementData._id
         });
@@ -60,8 +59,7 @@ Template.dialogNonTargetMeasurement.onRendered(() => {
     const viewerMain = $(instance.data.element).closest('.viewerMain')[0];
     instance.viewerData = Blaze.getData(viewerMain);
 
-    const measurementApi = instance.viewerData.measurementApi;
-    const timepointApi = instance.viewerData.timepointApi;
+    const { measurementApi, timepointApi } = OHIF.viewer;
 
     const collection = measurementApi.tools[instance.measurementTypeId];
 

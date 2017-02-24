@@ -6,21 +6,22 @@ import { OHIF } from 'meteor/ohif:core';
 OHIF.measurements.toggleLabelButton = options => {
     const toolType = options.measurement.toolType;
     const measurementId = options.measurement._id;
+    let buttonView = null;
 
     const removeButtonView = () => {
-        if (!options.instance.buttonView) {
+        if (!buttonView) {
             return;
         }
 
-        Blaze.remove(options.instance.buttonView);
-        options.instance.buttonView = null;
+        Blaze.remove(buttonView);
+        buttonView = null;
     };
 
-    if (options.instance.buttonView) {
+    if (buttonView) {
         removeButtonView();
     }
 
-    const measurementApi = options.measurementApi;
+    const measurementApi = OHIF.viewer.measurementApi;
     const toolCollection = measurementApi.tools[toolType];
     const measurement = toolCollection.findOne(measurementId);
 
@@ -53,6 +54,5 @@ OHIF.measurements.toggleLabelButton = options => {
             options.measurement.description = description;
         }
     };
-    const view = Blaze.renderWithData(Template.measureFlow, data, options.element);
-    options.instance.buttonView = view;
+    buttonView = Blaze.renderWithData(Template.measureFlow, data, options.element);
 };

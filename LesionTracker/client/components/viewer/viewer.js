@@ -25,6 +25,9 @@ Meteor.startup(() => {
     // Metadata configuration
     const metadataProvider = OHIF.viewer.metadataProvider;
     cornerstoneTools.metaData.addProvider(metadataProvider.provider.bind(metadataProvider));
+
+    // Target tools configuration
+    OHIF.lesiontracker.configureTargetToolsHandles();
 });
 
 Template.viewer.onCreated(() => {
@@ -32,6 +35,17 @@ Template.viewer.onCreated(() => {
     ViewerData = window.ViewerData || ViewerData;
 
     const instance = Template.instance();
+
+    const { TimepointApi, MeasurementApi, ConformanceCriteria } = OHIF.measurements;
+    const currentTimepointId = instance.data.currentTimepointId;
+    const timepointApi = new TimepointApi(currentTimepointId);
+    const measurementApi = new MeasurementApi(timepointApi);
+    const conformanceCriteria = new ConformanceCriteria(measurementApi, timepointApi);
+    Object.assign(OHIF.viewer, {
+        timepointApi,
+        measurementApi,
+        conformanceCriteria
+    });
 
     ValidationErrors.remove({});
 
@@ -89,20 +103,15 @@ Template.viewer.onCreated(() => {
         OHIF.viewer.Studies.insert(study);
     });
 
-    instance.data.timepointApi = new OHIF.measurements.TimepointApi(instance.data.currentTimepointId);
-
-    // TODO: Find a better way to pass this to the ViewportOverlay
-    OHIF.viewer.timepointApi = instance.data.timepointApi;
-
     const patientId = instance.data.studies[0].patientId;
 
     // LT-382: Preventing HP to keep identifying studies in timepoints that might be removed
     instance.data.studies.forEach(study => (delete study.timepointType));
 
     // TODO: Consider combining the retrieval calls into one?
-    const timepointsPromise = instance.data.timepointApi.retrieveTimepoints(patientId);
+    const timepointsPromise = timepointApi.retrieveTimepoints(patientId);
     timepointsPromise.then(() => {
-        const timepoints = instance.data.timepointApi.all();
+        const timepoints = timepointApi.all();
 
         //  Set timepointType in studies to be used in hanging protocol engine
         timepoints.forEach(timepoint => {
@@ -121,21 +130,19 @@ Template.viewer.onCreated(() => {
         Session.set('TimepointsReady', true);
 
         const timepointIds = timepoints.map(t => t.timepointId);
-        instance.data.measurementApi = new OHIF.measurements.MeasurementApi(instance.data.timepointApi);
-        instance.data.conformanceCriteria = new OHIF.measurements.ConformanceCriteria(instance.data.measurementApi, instance.data.timepointApi);
 
-        const measurementsPromise = instance.data.measurementApi.retrieveMeasurements(patientId, timepointIds);
+        const measurementsPromise = measurementApi.retrieveMeasurements(patientId, timepointIds);
         measurementsPromise.then(() => {
             Session.set('MeasurementsReady', true);
 
-            instance.data.measurementApi.syncMeasurementsAndToolData();
+            measurementApi.syncMeasurementsAndToolData();
         });
     });
 
     // Provide the necessary data to the Measurement API and Timepoint API
-    const prior = instance.data.timepointApi.prior();
+    const prior = timepointApi.prior();
     if (prior) {
-        instance.data.measurementApi.priorTimepointId = prior.timepointId;
+        measurementApi.priorTimepointId = prior.timepointId;
     }
 
     if (instance.data.currentTimepointId) {
@@ -163,8 +170,6 @@ Template.viewer.onCreated(() => {
         const tools = config.measurementTools[0].childTools;
         const firstTool = tools[Object.keys(tools)[0]];
         const measurementTypeId = firstTool.id;
-        const measurementApi = instance.data.measurementApi;
-        const timepointApi = instance.data.timepointApi;
 
         const collection = measurementApi.tools[measurementTypeId];
         const sorting = {

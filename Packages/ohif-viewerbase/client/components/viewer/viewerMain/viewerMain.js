@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
+import { Random } from 'meteor/random';
 import { OHIF } from 'meteor/ohif:core';
 // Local Modules
 import { toolManager } from '../../../lib/toolManager';
@@ -17,7 +18,7 @@ Template.viewerMain.onCreated(() => {
     // Attach the Window resize listener
     // Don't use jQuery here. "window.onresize" will always be null
     // If its necessary, check all the code for window.onresize getter
-    // and change it to jQuery._data(window, 'events')['resize']. 
+    // and change it to jQuery._data(window, 'events')['resize'].
     // Otherwise this function will be probably overrided.
     // See cineDialog instance.setResizeHandler function
     window.addEventListener('resize', window.ResizeViewportManager.getResizeHandler());
@@ -30,50 +31,47 @@ Template.viewerMain.onRendered(() => {
     const instance = Template.instance();
 
     HP.ProtocolStore.onReady(() => {
-        const { studies, currentTimepointId, measurementApi, timepointIds } = instance.data;
+        const { studies, currentTimepointId, timepointIds } = instance.data;
+        const measurementApi = OHIF.viewer.measurementApi;
         const parentElement = instance.$('#layoutManagerTarget').get(0);
 
         OHIF.viewerbase.layoutManager = new LayoutManager(parentElement, studies);
 
         // Default actions for Associated Studies
-        if(currentTimepointId) {
+        if (currentTimepointId) {
             // Follow-up studies: same as the first measurement in the table
             // Baseline studies: target-tool
-            if(studies[0]) {
+            if (studies[0]) {
                 let activeTool;
                 // In follow-ups, get the baseline timepointId
                 const timepointId = timepointIds.find(id => id !== currentTimepointId);
 
                 // Follow-up studies
-                if(studies[0].timepointType === 'followup' && timepointId) {
+                if (studies[0].timepointType === 'followup' && timepointId) {
                     const measurementTools = OHIF.measurements.MeasurementApi.getConfiguration().measurementTools;
 
                     // Create list of measurement tools
-                    const measurementTypes = measurementTools.map( 
-                        tool => {
-                            const { id, cornerstoneToolType } = tool;
-                            return {
-                                id,
-                                cornerstoneToolType
-                            }
-                        }
-                    );
+                    const measurementTypes = measurementTools.map(({ id, cornerstoneToolType }) => ({
+                        id,
+                        cornerstoneToolType
+                    }));
 
                     // Iterate over each measurment tool to find the first baseline
                     // measurment. If so, stops the loop and prevent fetching from all
                     // collections
-                    measurementTypes.every(({id, cornerstoneToolType}) => {
+                    measurementTypes.every(({ id, cornerstoneToolType }) => {
                         // Get measurement
-                        if(measurementApi[id]) {
+                        if (measurementApi[id]) {
                             const measurement = measurementApi[id].findOne({ timepointId });
 
                             // Found a measurement, save tool and stop loop
-                            if(measurement) {
+                            if (measurement) {
                                 activeTool = cornerstoneToolType;
 
                                 return false;
                             }
                         }
+
                         return true;
                     });
                 }
@@ -82,14 +80,14 @@ Template.viewerMain.onRendered(() => {
                 toolManager.setActiveTool(activeTool || 'bidirectional');
             }
 
-            // Toggle Measurement Table 
-            if(instance.data.state) {
+            // Toggle Measurement Table
+            if (instance.data.state) {
                 instance.data.state.set('rightSidebar', 'measurements');
             }
         }
         // Hide as default for single study
         else {
-            if(instance.data.state) {
+            if (instance.data.state) {
                 instance.data.state.set('rightSidebar', null);
             }
         }

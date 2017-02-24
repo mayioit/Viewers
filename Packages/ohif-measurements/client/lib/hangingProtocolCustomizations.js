@@ -1,9 +1,8 @@
 import { Meteor } from 'meteor/meteor';
-import { Template } from 'meteor/templating';
+import { OHIF } from 'meteor/ohif:core';
 
 const getTimepointType = study => {
-    const instance = Template.instance();
-    const timepointApi = instance.timepointApi || instance.data.timepointApi;
+    const timepointApi = OHIF.viewer.timepointApi;
     if (!timepointApi) {
         return;
     }

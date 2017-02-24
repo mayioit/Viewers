@@ -7,7 +7,7 @@ class MeasurementHandlers {
 
     static onAdded(e, instance, eventData) {
         const measurementData = eventData.measurementData;
-        const measurementApi = instance.data.measurementApi;
+        const measurementApi = OHIF.viewer.measurementApi;
         const Collection = measurementApi.tools[eventData.toolType];
 
         // Stop here if the tool data shall not be stored (e.g. temp tools)
@@ -75,7 +75,7 @@ class MeasurementHandlers {
 
     static onModified(e, instance, eventData) {
         const measurementData = eventData.measurementData;
-        const measurementApi = instance.data.measurementApi;
+        const measurementApi = OHIF.viewer.measurementApi;
         const Collection = measurementApi.tools[eventData.toolType];
 
         // Stop here if the tool data shall not be stored (e.g. temp tools)
@@ -119,8 +119,7 @@ class MeasurementHandlers {
         OHIF.log.info('CornerstoneToolsMeasurementRemoved');
         const measurementData = eventData.measurementData;
         const measurementNumber = measurementData.measurementNumber;
-        const measurementApi = instance.data.measurementApi;
-        const timepointApi = instance.data.timepointApi;
+        const { measurementApi, timepointApi } = OHIF.viewer;
         const collection = measurementApi.tools[eventData.toolType];
         const measurementTypeId = measurementApi.toolsGroupsMap[measurementData.toolType];
         const measurement = collection.findOne(measurementData._id);
